@@ -1,0 +1,18 @@
+Copyright (c) 2026 abhishek-donekal. All rights reserved.
+
+This source code is made publicly visible for evaluation only. No license is
+granted to copy, modify, distribute, sublicense, sell, or use this software,
+in whole or in part, for any purpose other than personal evaluation, without
+prior written permission from the copyright holder.
+
+For commercial licensing, contact the copyright holder via
+https://github.com/abhishek-donekal.
+
+Third-party components keep their own licenses:
+  .claude/skills/  MIT License, Copyright (c) 2026 Jake Schincariol
+                   (see .claude/skills/DAY-TRADER-LICENSE)
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, INCLUDING TRADING LOSSES, ARISING FROM THE USE OF THIS
+SOFTWARE. THIS IS NOT FINANCIAL ADVICE.

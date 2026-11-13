@@ -210,13 +210,14 @@ def build():
     if open_t:
         t = open_t[-1]
         tr = dict(s=_short(t["symbol"]), entry=t["entry"], pnl=t.get("pnl_pct"), side=t.get("side", "long"))
+    opens = [dict(s=_short(t["symbol"]), pnl=t.get("pnl_pct"), side=t.get("side", "long")) for t in open_t]
     equity, run = [0.0], 0.0
     for t in closed:
         run += float(t.get("pnl_usd") or 0)
         equity.append(round(run, 2))
     data = dict(
         stocks_open=stocks_open, last=D.et(last.get("time_utc"), "%I:%M %p") if last else "--", next_ms=next_ms,
-        budget=budget, cadence_long=cadence_long, cadence_short=cadence_short, agents=agents, brief=brief, syms=syms, qual=[_short(s) for s in qual], qual_s=sorted(qual_s), trade=tr,
+        budget=budget, cadence_long=cadence_long, cadence_short=cadence_short, agents=agents, brief=brief, syms=syms, qual=[_short(s) for s in qual], qual_s=sorted(qual_s), trade=tr, opens=opens,
         pnl=round(run, 2), pnl_today=round(pnl_today, 2), n_today=n_today, max_t=max_t, max_l=max_l,
         trades=len(trades), closed=len(closed), wins=wins, scans=len(runs), equity=equity,
         hist=[len(r.get("uptrend", [])) for r in runs[-72:]], feed=_feed(events))
@@ -438,13 +439,16 @@ function tick(){const now=new Date();
   $('clock').textContent=now.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'})+' ET';
   if(D.next_ms&&$('cd')){const s=Math.max(0,Math.round((D.next_ms-now.getTime())/1000));
     $('cd').textContent=s>0?Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'now';}}
-if(D.trade)$('meta').innerHTML='New market checks resume when this trade closes · Last check <span>'+esc(D.last)+'</span>';
+if(D.trade)$('meta').innerHTML='Scanning continues while positions are managed · Last check <span>'+esc(D.last)+'</span>';
 $('cadence1').textContent=D.cadence_long;$('k-bud').textContent='$'+D.budget.toLocaleString('en-US');$('k-bud2').textContent='Max $'+(D.budget/4).toLocaleString('en-US')+' per position · up to 4 at once';$('cadence2').textContent=D.cadence_short;
 setInterval(tick,1000);tick();
 
 // status
 const blocked=D.agents.some(a=>a.st==='blocked');let t,c,b;
-if(D.trade){t=(D.trade.side==='short'?'In a short trade (betting on a fall): ':'In a trade: ')+esc(D.trade.s)+(D.trade.pnl!=null?' ('+(D.trade.pnl>=0?'+':'')+D.trade.pnl.toFixed(2)+'%)':'');c=(D.trade.pnl||0)>=0?'var(--green)':'var(--red)';b=(D.trade.pnl||0)>=0?'var(--green-s)':'var(--red-s)';}
+if(D.trade){const os=D.opens&&D.opens.length?D.opens:[D.trade],tot=os.reduce((a,o)=>a+(o.pnl||0),0);
+  const one=o=>esc(o.s)+(o.side==='short'?' (short)':'')+(o.pnl!=null?' '+(o.pnl>=0?'+':'')+o.pnl.toFixed(2)+'%':'');
+  t=os.length>1?'In '+os.length+' trades: '+os.map(one).join(' · '):(D.trade.side==='short'?'In a short trade (betting on a fall): ':'In a trade: ')+one(os[0]);
+  c=tot>=0?'var(--green)':'var(--red)';b=tot>=0?'var(--green-s)':'var(--red-s)';}
 else if(blocked){t='Paused for today: safety limit reached';c='var(--red)';b='var(--red-s)';}
 else if(D.qual.length||D.qual_s.length){t=[D.qual.length?'Buy signal: '+D.qual.map(esc).join(', '):'',D.qual_s.length?'Short signal: '+D.qual_s.map(esc).join(', '):''].filter(Boolean).join(' · ');c='var(--green)';b='var(--green-s)';}
 else{t='Watching the market: waiting for a high-odds opportunity';c='var(--blue)';b='var(--blue-s)';}
